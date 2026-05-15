@@ -1227,6 +1227,25 @@ function openDeleteSelected() {
 function openModal() { document.getElementById('delete-modal').classList.add('open'); }
 function closeModal() { document.getElementById('delete-modal').classList.remove('open'); pendingDeleteIds = []; }
 
+async function sbDelete(id) {
+  const url = SUPABASE_URL + '/rest/v1/qc_entries?id=eq.' + id;
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    }
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errMsg = 'HTTP ' + res.status;
+    try { const j = JSON.parse(text); errMsg = j.message || j.hint || j.error || text; } catch(_) { errMsg = text || errMsg; }
+    throw new Error(errMsg);
+  }
+}
+
 async function confirmDelete() {
   if (!pendingDeleteIds.length) return;
   const btn = document.getElementById('btn-confirm-delete');
@@ -1235,8 +1254,7 @@ async function confirmDelete() {
   try {
     for (const id of pendingDeleteIds) {
       if (supabaseClient) {
-        const numId = Number(id);
-        await sbFetch(`qc_entries?id=eq.${numId}`, { method: 'DELETE', prefer: 'return=minimal' });
+        await sbDelete(id);
       } else {
         let stored = JSON.parse(localStorage.getItem('qc_entries') || '[]');
         stored = stored.filter(r => String(r.id) !== String(id));
@@ -1251,10 +1269,18 @@ async function confirmDelete() {
     renderManageTable();
   } catch(e) {
     console.error('Delete error:', e);
-    showToast('❌ Gagal menghapus: ' + (e.message || 'Unknown error'), true);
-  } finally {
-    btn.disabled = false; label.textContent = '🗑 Hapus';
+    const errText = e.message || 'Unknown error';
+    // Tampilkan error spesifik agar mudah debug
+    document.getElementById('modal-desc').innerHTML =
+      `<span style="color:#C93A3A;font-size:0.82rem">❌ Gagal: <strong>${errText}</strong><br><br>` +
+      `Kemungkinan penyebab:<br>` +
+      `• RLS Supabase blokir DELETE → aktifkan policy DELETE di Supabase<br>` +
+      `• Tipe kolom id tidak cocok</span>`;
+    btn.disabled = false;
+    label.textContent = '🗑 Hapus';
+    return;
   }
+  btn.disabled = false; label.textContent = '🗑 Hapus';
 }
 
 initSupabase();
