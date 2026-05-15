@@ -1402,6 +1402,15 @@ window.editEntry = editEntry;
 window.openDeleteSingle = openDeleteOne; // alias for backward compat
 window.submitEntry = submitEntry;
 
+// GLOBAL EVENT DELEGATION FOR EDIT BUTTON
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('[data-edit-id]');
+  if(btn){
+    const id = btn.getAttribute('data-edit-id');
+    editEntry(id);
+  }
+});
+
 function filterSkuOptions(){
   const input = document.getElementById('sku-search-input').value.toLowerCase();
   const select = document.getElementById('f-product-name');
