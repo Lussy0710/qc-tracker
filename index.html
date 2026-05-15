@@ -1185,8 +1185,15 @@ function editEntry(id) {
   document.getElementById('f-mp-name').value = row.mp_name || '';
 
   toggleMPFields();
-  showView('form');
+  showView('form'); window.scrollTo({top:0,behavior:'smooth'});
 }
+
+
+// FIX GLOBAL BUTTON FUNCTIONS
+window.editEntry = editEntry;
+window.openDeleteSingle = openDeleteSingle;
+window.submitEntry = submitEntry;
+
 
 function toggleMPFields() {
   const val = document.getElementById('f-root-cause').value;
