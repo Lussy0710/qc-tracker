@@ -1008,6 +1008,7 @@ async function submitEntry() {
     setTimeout(() => showView('dashboard'), 900);
   } catch(e) {
     console.error('Save error:', e);
+    alert('ERROR SAVE: ' + (e.message || JSON.stringify(e)));
     showToast('❌ Save failed: ' + (e.message || 'Unknown error'), true);
   } finally {
     btn.disabled = false; label.textContent = '✔ Save Entry';
@@ -1534,5 +1535,46 @@ async function confirmDelete() {
 initSupabase();
 loadData().then(() => applyFilters());
 </script>
+
+<!--
+SUPABASE SQL SETUP
+
+create table if not exists qc_entries (
+  id bigint primary key,
+  timestamp text,
+  date date,
+  product_name text,
+  qty_reject integer,
+  defect_type text,
+  product_category text,
+  mp_category text,
+  mp_name text,
+  root_cause text,
+  root_cause_details text,
+  notes text,
+  submitted_by text
+);
+
+alter table qc_entries enable row level security;
+
+create policy "Allow insert for anon"
+on qc_entries
+for insert
+to anon
+with check (true);
+
+create policy "Allow select for anon"
+on qc_entries
+for select
+to anon
+using (true);
+
+create policy "Allow delete for anon"
+on qc_entries
+for delete
+to anon
+using (true);
+-->
+
 </body>
 </html>
