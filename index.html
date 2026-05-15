@@ -441,6 +441,104 @@
     .form-footer { padding: 1rem 1.25rem; }
     .form-card-header { padding: 1.25rem; }
   }
+
+  /* ── FISHBONE ── */
+  .fishbone-wrapper {
+    padding: 2rem 1rem;
+    overflow-x: auto;
+  }
+
+  .fishbone-body {
+    position: relative;
+    min-width: 900px;
+    padding: 2rem 0;
+  }
+
+  .spine {
+    height: 6px;
+    background: linear-gradient(90deg, var(--p4), var(--p7));
+    border-radius: 999px;
+    position: relative;
+    margin: 120px 0;
+  }
+
+  .fishbone-head {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: -20px;
+  }
+
+  .fishbone-problem {
+    background: linear-gradient(135deg, #FF7A7A, #C93A3A);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 1rem;
+    box-shadow: 0 6px 18px rgba(201,58,58,0.25);
+  }
+
+  .bone-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .bone-group.top {
+    margin-bottom: -70px;
+  }
+
+  .bone-group.bottom {
+    margin-top: -70px;
+  }
+
+  .bone {
+    width: 30%;
+    background: #fff;
+    border: 1.5px solid var(--p1);
+    border-radius: 18px;
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .bone::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background: var(--p5);
+    top: 50%;
+  }
+
+  .bone-group.top .bone::after {
+    bottom: -20px;
+    transform: rotate(25deg);
+  }
+
+  .bone-group.bottom .bone::after {
+    top: -20px;
+    transform: rotate(-25deg);
+  }
+
+  .bone-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--p7);
+    margin-bottom: 0.75rem;
+  }
+
+  .bone ul {
+    padding-left: 1rem;
+  }
+
+  .bone li {
+    font-size: 0.78rem;
+    margin-bottom: 0.45rem;
+    color: var(--ink2);
+    line-height: 1.45;
+  }
+
 </style>
 </head>
 <body>
@@ -562,7 +660,66 @@
       </div>
       <div class="chart-container" style="height:260px"><canvas id="control-chart"></canvas></div>
     </div>
+  
+  <!-- FISHBONE DIAGRAM -->
+  <div class="card wide">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Fishbone Diagram Analysis</div>
+        <div class="card-sub">Visual root cause mapping berdasarkan kategori 6M</div>
+      </div>
+      <span class="card-badge">🐟 Fishbone</span>
+    </div>
+
+    <div id="fishbone-container" class="fishbone-wrapper">
+      <div class="fishbone-head">
+        <div class="fishbone-problem">
+          QUALITY ISSUE
+        </div>
+      </div>
+
+      <div class="fishbone-body">
+
+        <div class="bone-group top">
+          <div class="bone">
+            <div class="bone-title">👨 Man</div>
+            <ul id="fb-man"></ul>
+          </div>
+
+          <div class="bone">
+            <div class="bone-title">⚙ Machine</div>
+            <ul id="fb-machine"></ul>
+          </div>
+
+          <div class="bone">
+            <div class="bone-title">🧪 Material</div>
+            <ul id="fb-material"></ul>
+          </div>
+        </div>
+
+        <div class="spine"></div>
+
+        <div class="bone-group bottom">
+          <div class="bone">
+            <div class="bone-title">📋 Method</div>
+            <ul id="fb-method"></ul>
+          </div>
+
+          <div class="bone">
+            <div class="bone-title">🏭 Environment</div>
+            <ul id="fb-environment"></ul>
+          </div>
+
+          <div class="bone">
+            <div class="bone-title">📏 Measurement</div>
+            <ul id="fb-measurement"></ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
+
 
   <div class="table-card">
     <div class="table-header">
@@ -908,7 +1065,7 @@ function applyFilters() {
     return true;
   });
   updateStats(); updateWeeklyTable();
-  updateHistogram(); updatePareto(); updateControlChart(); updateDataTable();
+  updateHistogram(); updatePareto(); updateControlChart(); updateFishboneDiagram(); updateDataTable();
 }
 
 function resetFilters() {
@@ -1069,6 +1226,70 @@ function updateControlChart() {
     }
   });
 }
+
+
+function updateFishboneDiagram() {
+
+  const map = {
+    man: [],
+    machine: [],
+    material: [],
+    method: [],
+    environment: [],
+    measurement: []
+  };
+
+  filteredData.forEach(r => {
+
+    const detail = r.root_cause_details || r.root_cause || '-';
+
+    switch ((r.root_cause || '').toLowerCase()) {
+
+      case 'man power':
+        map.man.push(detail);
+        break;
+
+      case 'machine':
+        map.machine.push(detail);
+        break;
+
+      case 'material':
+        map.material.push(detail);
+        break;
+
+      case 'work instruction':
+      case 'recipe':
+        map.method.push(detail);
+        break;
+
+      case 'facility':
+        map.environment.push(detail);
+        break;
+
+      case 'vendor spec':
+        map.measurement.push(detail);
+        break;
+    }
+  });
+
+  Object.keys(map).forEach(key => {
+
+    const el = document.getElementById(`fb-${key}`);
+    if (!el) return;
+
+    const unique = [...new Set(map[key])].slice(0,5);
+
+    if (!unique.length) {
+      el.innerHTML = `<li>No data</li>`;
+      return;
+    }
+
+    el.innerHTML = unique
+      .map(v => `<li>${v}</li>`)
+      .join('');
+  });
+}
+
 
 const defectBadgeClass = {
   'Foreign Material':'badge-blue','Spoiled':'badge-red',
