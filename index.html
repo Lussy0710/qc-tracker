@@ -5,7 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QC Dashboard ✨</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+// GLOBAL EVENT DELEGATION FOR EDIT BUTTON
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('[data-edit-id]');
+  if(btn){
+    const id = btn.getAttribute('data-edit-id');
+    if(typeof editEntry === 'function'){
+      editEntry(id);
+    } else {
+      console.error('editEntry function not found');
+      alert('Edit function error');
+    }
+  }
+});
+
+
+function filterSkuOptions(){
+  const input = document.getElementById('sku-search-input').value.toLowerCase();
+  const select = document.getElementById('f-product-name');
+  const options = select.options;
+
+  for(let i=0;i<options.length;i++){
+    const txt = options[i].text.toLowerCase();
+    options[i].style.display = txt.includes(input) ? '' : 'none';
+  }
+}
+
+function selectSkuOption(){
+  const select = document.getElementById('f-product-name');
+  if(select.value){
+    document.getElementById('sku-search-input').value = select.value;
+  }
+}
+
+</script>
 <style>
   :root {
     --p0:  #FFF9F5;
@@ -449,6 +483,63 @@
     .form-footer { padding: 1rem 1.25rem; }
     .form-card-header { padding: 1.25rem; }
   }
+
+#f-product-name{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ffd6e0;
+  background:#fffaf5;
+  font-size:14px;
+}
+
+
+#f-product-name{
+ width:100%;
+ padding:12px;
+ border-radius:12px;
+ border:1px solid #ffd6e0;
+ background:#fffaf5;
+ font-size:14px;
+}
+
+
+#f-product-name{
+  width:100% !important;
+  padding:12px !important;
+  border-radius:12px !important;
+  border:2px solid #ffc8d7 !important;
+  background:#fffaf7 !important;
+  font-size:14px !important;
+  outline:none;
+}
+
+
+.sku-search-wrapper{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+#sku-search-input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:2px solid #ffc9d8;
+  background:#fffaf7;
+  font-size:14px;
+}
+
+#f-product-name{
+  width:100%;
+  border-radius:12px;
+  border:2px solid #ffd8a8;
+  padding:10px;
+  background:white;
+  font-size:14px;
+  min-height:220px;
+}
+
 </style>
 </head>
 <body>
@@ -616,7 +707,150 @@
       <div class="form-grid">
         <div class="form-group">
           <label>SKU / Product Name <span class="req">*</span></label>
-          <input type="text" id="f-product-name" placeholder="e.g. SKU-001 Chocolate Wafer 100g" /><span class="form-error" id="err-product-name"></span>
+          
+
+
+
+<div class="sku-search-wrapper">
+  <input 
+    type="text" 
+    id="sku-search-input"
+    placeholder="🔍 Cari SKU / Product..."
+    autocomplete="off"
+    onkeyup="filterSkuOptions()"
+  />
+
+  
+<select id="f-product-name" size="12" onclick="selectSkuOption()">
+<option value="">-- Pilih SKU / Product --</option>
+<option>Kerupuk Udang 65gr Astro Basics</option>
+<option>Wasabi Explosion Cashew 80gr Astro Goods</option>
+<option>Ayam Opor Astro Goods x Royco 300 gram</option>
+<option>Garlic In Oil 150gr - Astro goods</option>
+<option>Bawang Merah Goreng 40gr Astro Basics</option>
+<option>Bumbu Pecel 150gr Astro Goods</option>
+<option>Ayam Goreng Gurih Astro Goods x Royco 300 gram</option>
+<option>Bumbu Dasar Merah 150gr Astro Goods</option>
+<option>Dry Rubs Rotisserie Poultry 75gr Astro Goods 75 gram</option>
+<option>Jackfruit chips 70g Astro Goods</option>
+<option>Emping Asin 65gr Astro Basics</option>
+<option>Bumbu Dasar Putih 150gr Astro Goods</option>
+<option>Hondashi Fish Powder/Kaldu Ikan Hondashi 40g Astro Goods</option>
+<option>Gula Aren Organic Bubuk 500gr Astro Goods</option>
+<option>Cinnamon / Kayu Manis Bubuk 40gr Astro Basics</option>
+<option>White pepper / Lada Putih 55g Astro Basics</option>
+<option>Garlic / Bawang Putih Powder 50gr Astro Basics</option>
+<option>Indian Curry Powder 55gr Astro Goods/ Kari India Bubuk</option>
+<option>Turmeric / Kunyit powder 50gr Astro Basics</option>
+<option>Garlic Bliss Cashew 80gr - Astro Goods</option>
+<option>Cashew Choco Buzz Blend 80g Astro Goods</option>
+<option>Black pepper / Lada Hitam  50gr Astro Basics</option>
+<option>Nutmeg / Pala  powder 40gr Astro Basics</option>
+<option>Onion Powder 55gr Astro Basics</option>
+<option>Salak Chips 70gr Astro Goods</option>
+<option>Peppery Delight Cashew 80gr Astro Goods</option>
+<option>Paprika Powder 50gr Astro Basics</option>
+<option>Dry Rubs Spicy Barbercue 75gr Astro Goods 75 gram</option>
+<option>Dried Thyme Leaves Astro Goods 30 gram</option>
+<option>Chili Flakes 30gr Astro Goods/ Cabai Kasar Bubuk</option>
+<option>Dried Oregano Leaves Astro Goods 15 gram</option>
+<option>Mushroom Powder/ Kaldu Jamur 50g Astro Goods</option>
+<option>Apple Chips 70gr - Astro Goods</option>
+<option>Dry Rubs Mediterranean Grill 75gr Astro Goods 75 gram</option>
+<option>Dried Rosemary Leaves Astro Goods 30 gram</option>
+<option>Bumbu Ngohiong 50gr Astro Goods</option>
+<option>Cilantro / Ketumbar Powder 55gr Astro Basics</option>
+<option>Bawang Putih Goreng 60g Astro Basics</option>
+<option>Dry Rubs Classic Barbercue 75gr Astro Goods 75 gram</option>
+<option>Chili powder 35gr Astro Basics</option>
+<option>Biji Selasih 75gr Astro Goods</option>
+<option>Bolognese Pasta Sauce Astro Goods</option>
+<option>Pesto Pasta Sauce Astro Goods</option>
+<option>Tom yum seafood</option>
+<option>Green Curry Chicken</option>
+<option>Pad Kra Pao/Thai Chicken Basil Astro Goods 200gram</option>
+<option>Finish Goods - Sate Maranggi @10pcs</option>
+<option>Finish Goods - Chilled/Frozen Truffle Bitterballen 6pcs - AG</option>
+<option>Finish Goods - Chilled/Frozen Truffle Soup 150ml - AG</option>
+<option>Finish Goods - Chilled/Frozen Truffle Pasta 275gr - AG</option>
+<option>Chicken Yakiniku Single Portion Astro Goods 100gram 100gram</option>
+<option>Beef Yakiniku Single Portion Astro Goods 100gram 100gram</option>
+<option>Nasi Goreng Seafood - AK</option>
+<option>Nasi Goreng Ayam Cabe Ijo - AK</option>
+<option>Kerupuk bawang - AK</option>
+<option>Samyang Sauce 100Ml</option>
+<option>Herb Chicken Topping</option>
+<option>Alfredo Sauce 100Ml</option>
+<option>Marinara Sauce 100Ml</option>
+<option>Beef Meatballs</option>
+<option>Spaghetti 175gr</option>
+<option>Spaghetti Aglio Olio 270gr</option>
+<option>Frozen Nasi Putih - AK</option>
+<option>Teriyaki chicken - AK</option>
+<option>Original beef - AK</option>
+<option>Teriyaki beef - AK</option>
+<option>Strawberry Pure Frozen 20gr - AK</option>
+<option>WIP Astro Kitchen - Espresso concentrate 1L</option>
+<option>Opor Ayam Putih Royco - AK - 90 gr</option>
+<option>Ayam Goreng Royco - AK - 2 Pcs</option>
+<option>Sambal Bawang - AK - 10 gr</option>
+<option>Opor Ayam - AK - 200gr</option>
+<option>Opor Ayam - AK - 400gr</option>
+<option>Nasi Putih - AK - 360 Gr</option>
+<option>Chilled/Frozen Cumi Expat - AK - 100 Gr</option>
+<option>Brokoli</option>
+<option>Tempe orek</option>
+<option>Finish Goods - Chilled/Frozen Cugil tanpa Pete 100gr -  AK</option>
+<option>Finish Goods - Chilled/Frozen Mac n Cheese Cheddar - AKAK</option>
+<option>Finish Goods - Chilled/Frozen Mac n Cheese Samyang -220gr - AK</option>
+<option>WIP - Beras Cianjur 540gr</option>
+<option>WIP - Biji Kopi Astro's Blend</option>
+<option>Finish Goods - Chilled/Frozen Pink Nana Smoothies Material - Astro GO/AK</option>
+<option>Finish Goods - Chilled/Frozen Milky Way Smoothies Material - Astro GO/AK</option>
+<option>Finish Goods - Chilled/Frozen Tropical Sunrise Smoothies Material - Astro GO/AK</option>
+<option>Finish Goods - Chilled/Frozen Coconut Cloud Smoothies Material - Astro GO/AK</option>
+<option>Finish Goods - Honey Jelly 150gr</option>
+<option>WIP - Beras Cianjur X Ketan (mixed) 540gr</option>
+<option>Finish Goods - Frozen Base Avocado Banana 170gr - AK</option>
+<option>Finish Goods - Bawang Merah Goreng 200gr - AK</option>
+<option>Finish Goods - Chilled Daun Bawang Cincang / Sliced Leeks 50gr - AK</option>
+<option>Chilled/Frozen Dendeng Cabe Ijo 100gr - AK</option>
+<option>Chilled/Frozen Dendeng Balado Merah 100gr - AK</option>
+<option>Chilled/Frozen Semur Daging 140gr - AK</option>
+<option>Finish Goods - WIP Cold Brew concentrate KINTAMANI 1L - AK</option>
+<option>Finish Goods - WIP Cold Brew concentrate PATRIA 1L - AK</option>
+<option>Finish Goods - Onigiri Salmon Mentai 110gr - AK</option>
+<option>Finish Goods - Onigiri Tuna Mayo 110gr - AK</option>
+<option>Finish Goods - Onigiri Ebi Mentai 110gr - AK</option>
+<option>Finish Goods - Onigiri Beef Yakiniku 110gr - AK</option>
+<option>Finish Goods - Onigiri Chicken Truffle 110gr - AK</option>
+<option>Finish Goods - Sambal Korek 15gr ver 2 - AK</option>
+<option>Finish Goods - Sayur Ceciwis 40gr - AK</option>
+<option>Finisih Goods - Telur Marinated 1pcs - AK</option>
+<option>Finish Goods - Grilled Chicken 100gr - AK</option>
+<option>Finish Goods - Nasi Merah 180gr - AK</option>
+<option>Mentai Sauce - AC</option>
+<option>Katsu Sauce - AC</option>
+<option>Finish Good - French Onion Sauce - 100gr - AC</option>
+<option>Finish Good - Plain Cream Cheese - 50gr - AC</option>
+<option>Finish Goods - Chilled/Frozen Sayur Pakchoi 40gr - AC</option>
+<option>Finish Goods - [ver2[ Onigiri Salmon Mentai 130gr - AK</option>
+<option>Finish Goods - [Ver2] Onigiri Tuna Mayo 130gr - AK</option>
+<option>Finish Goods - [Ver2] Onigiri Beef Yakiniku 130gr - AK</option>
+<option>Finish Goods - [Ver2] Onigiri Ebi Mentai 130gr - AK</option>
+<option>Finish Goods - [Ver2] Onigiri Chicken Truffle 130gr - AK</option>
+<option>Finish Goods - [V2] Chilled/Frozen Cugil Tanpa Pete Baby 100gr - AK</option>
+<option>Finish Goods - [V2] Chilled/Frozen Cugil Baby 100gr - AK</option>
+</select>
+
+</div>
+
+
+<span class="form-error" id="err-product-name"></span>
+<div style="font-size:12px;color:#b06b7d;margin-top:6px;">
+Ketik nama SKU untuk mencari product
+</div>
+
         </div>
         <div class="form-group">
           <label>Product Category <span class="req">*</span></label>
@@ -1128,7 +1362,7 @@ function updateDataTable() {
     <tr>
       <td>${r.date||'—'}</td>
       <td style="font-weight:700">
-        <button class="edit-row-btn" onclick="editEntry('${r.id}')">✏️ Edit</button>
+        <button class="edit-row-btn" data-edit-id="${r.id}">✏️ Edit</button>
         <button class="delete-row-btn" onclick="openDeleteSingle('${r.id}')">🗑 Delete</button>
         ${r.product_name||'—'}
       </td>
@@ -1235,7 +1469,7 @@ function renderManageTable() {
       <td class="cb-col"><input type="checkbox" class="row-cb" ${checked} onchange="toggleRowSelect('${r.id}', this)" /></td>
       <td>${r.date||'—'}</td>
       <td style="font-weight:700">
-        <button class="edit-row-btn" onclick="editEntry('${r.id}')">✏️ Edit</button>
+        <button class="edit-row-btn" data-edit-id="${r.id}">✏️ Edit</button>
         <button class="delete-row-btn" onclick="openDeleteSingle('${r.id}')">🗑 Delete</button>
         ${r.product_name||'—'}
       </td>
@@ -1369,6 +1603,40 @@ async function confirmDelete() {
 
 initSupabase();
 loadData().then(() => applyFilters());
+
+// GLOBAL EVENT DELEGATION FOR EDIT BUTTON
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('[data-edit-id]');
+  if(btn){
+    const id = btn.getAttribute('data-edit-id');
+    if(typeof editEntry === 'function'){
+      editEntry(id);
+    } else {
+      console.error('editEntry function not found');
+      alert('Edit function error');
+    }
+  }
+});
+
+
+function filterSkuOptions(){
+  const input = document.getElementById('sku-search-input').value.toLowerCase();
+  const select = document.getElementById('f-product-name');
+  const options = select.options;
+
+  for(let i=0;i<options.length;i++){
+    const txt = options[i].text.toLowerCase();
+    options[i].style.display = txt.includes(input) ? '' : 'none';
+  }
+}
+
+function selectSkuOption(){
+  const select = document.getElementById('f-product-name');
+  if(select.value){
+    document.getElementById('sku-search-input').value = select.value;
+  }
+}
+
 </script>
 </body>
 </html>
