@@ -5,41 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QC Dashboard ✨</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-// GLOBAL EVENT DELEGATION FOR EDIT BUTTON
-document.addEventListener('click', function(e){
-  const btn = e.target.closest('[data-edit-id]');
-  if(btn){
-    const id = btn.getAttribute('data-edit-id');
-    if(typeof editEntry === 'function'){
-      editEntry(id);
-    } else {
-      console.error('editEntry function not found');
-      alert('Edit function error');
-    }
-  }
-});
-
-
-function filterSkuOptions(){
-  const input = document.getElementById('sku-search-input').value.toLowerCase();
-  const select = document.getElementById('f-product-name');
-  const options = select.options;
-
-  for(let i=0;i<options.length;i++){
-    const txt = options[i].text.toLowerCase();
-    options[i].style.display = txt.includes(input) ? '' : 'none';
-  }
-}
-
-function selectSkuOption(){
-  const select = document.getElementById('f-product-name');
-  if(select.value){
-    document.getElementById('sku-search-input').value = select.value;
-  }
-}
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --p0:  #FFF9F5;
@@ -1051,6 +1017,14 @@ async function loadData() {
     const msg = e?.message || e?.error_description || JSON.stringify(e);
     console.error('Load error:', msg, e);
     allData = JSON.parse(localStorage.getItem('qc_entries') || '[]');
+    const existing = document.getElementById('supabase-error-notice');
+    if (!existing) {
+      const notice = document.createElement('div');
+      notice.id = 'supabase-error-notice';
+      notice.style.cssText = 'position:fixed;top:64px;left:0;right:0;z-index:999;background:#7F1D1D;color:#FCA5A5;padding:10px 20px;font-size:0.82rem;font-weight:700;text-align:center;';
+      notice.innerHTML = '\u26A0\uFE0F Tidak dapat terhubung ke Supabase \u2014 kemungkinan project di-<strong>pause</strong>. Aktifkan di <a href="https://supabase.com/dashboard" target="_blank" style="color:#FCA5A5;text-decoration:underline">supabase.com/dashboard</a> lalu refresh. <button onclick="this.parentElement.remove()" style="background:none;border:1px solid #FCA5A5;color:#FCA5A5;border-radius:6px;padding:2px 8px;cursor:pointer;margin-left:8px">\u2715 Tutup</button>';
+      document.body.appendChild(notice);
+    }
   }
 }
 
@@ -1363,7 +1337,7 @@ function updateDataTable() {
       <td>${r.date||'—'}</td>
       <td style="font-weight:700">
         <button class="edit-row-btn" data-edit-id="${r.id}">✏️ Edit</button>
-        <button class="delete-row-btn" onclick="openDeleteSingle('${r.id}')">🗑 Delete</button>
+        <button class="delete-row-btn" onclick="openDeleteOne('${r.id}', '${(r.product_name||'entri').replace(/'/g,"\\'")}')">🗑 Delete</button>
         ${r.product_name||'—'}
       </td>
       <td style="font-weight:800;color:var(--p6)">${r.qty_reject||0}</td>
@@ -1425,8 +1399,25 @@ function editEntry(id) {
 
 // FIX GLOBAL BUTTON FUNCTIONS
 window.editEntry = editEntry;
-window.openDeleteSingle = openDeleteSingle;
+window.openDeleteSingle = openDeleteOne; // alias for backward compat
 window.submitEntry = submitEntry;
+
+function filterSkuOptions(){
+  const input = document.getElementById('sku-search-input').value.toLowerCase();
+  const select = document.getElementById('f-product-name');
+  const options = select.options;
+  for(let i=0;i<options.length;i++){
+    const txt = options[i].text.toLowerCase();
+    options[i].style.display = txt.includes(input) ? '' : 'none';
+  }
+}
+
+function selectSkuOption(){
+  const select = document.getElementById('f-product-name');
+  if(select.value){
+    document.getElementById('sku-search-input').value = select.value;
+  }
+}
 
 
 function toggleMPFields() {
@@ -1604,38 +1595,6 @@ async function confirmDelete() {
 initSupabase();
 loadData().then(() => applyFilters());
 
-// GLOBAL EVENT DELEGATION FOR EDIT BUTTON
-document.addEventListener('click', function(e){
-  const btn = e.target.closest('[data-edit-id]');
-  if(btn){
-    const id = btn.getAttribute('data-edit-id');
-    if(typeof editEntry === 'function'){
-      editEntry(id);
-    } else {
-      console.error('editEntry function not found');
-      alert('Edit function error');
-    }
-  }
-});
-
-
-function filterSkuOptions(){
-  const input = document.getElementById('sku-search-input').value.toLowerCase();
-  const select = document.getElementById('f-product-name');
-  const options = select.options;
-
-  for(let i=0;i<options.length;i++){
-    const txt = options[i].text.toLowerCase();
-    options[i].style.display = txt.includes(input) ? '' : 'none';
-  }
-}
-
-function selectSkuOption(){
-  const select = document.getElementById('f-product-name');
-  if(select.value){
-    document.getElementById('sku-search-input').value = select.value;
-  }
-}
 
 </script>
 </body>
