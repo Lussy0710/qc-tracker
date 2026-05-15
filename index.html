@@ -600,6 +600,15 @@
       <div class="filter-field"><label>Date From</label><input type="date" id="filter-date-from" onchange="applyFilters()" /></div>
       <div class="filter-field"><label>Date To</label><input type="date" id="filter-date-to" onchange="applyFilters()" /></div>
       <div class="filter-field">
+        <label>SKU / Product</label>
+        <input
+          type="text"
+          id="filter-sku"
+          placeholder="Cari SKU..."
+          oninput="applyFilters()"
+        />
+      </div>
+      <div class="filter-field">
         <label>Defect Type</label>
         <select id="filter-defect" onchange="applyFilters()">
           <option value="">All Defects</option>
@@ -1053,23 +1062,41 @@ function showToast(msg, isError = false) {
 function applyFilters() {
   const from = document.getElementById('filter-date-from').value;
   const to   = document.getElementById('filter-date-to').value;
+
+  const sku = document.getElementById('filter-sku').value.toLowerCase();
+
   const defect    = document.getElementById('filter-defect').value;
   const prodcat   = document.getElementById('filter-prodcat').value;
   const rootcause = document.getElementById('filter-rootcause').value;
+
   filteredData = allData.filter(r => {
+
     if (from && r.date < from) return false;
     if (to   && r.date > to)   return false;
-    if (defect    && r.defect_type       !== defect)    return false;
-    if (prodcat   && r.product_category  !== prodcat)   return false;
-    if (rootcause && r.root_cause        !== rootcause) return false;
+
+    if (
+      sku &&
+      !(r.product_name || '').toLowerCase().includes(sku)
+    ) return false;
+
+    if (defect    && r.defect_type      !== defect)    return false;
+    if (prodcat   && r.product_category !== prodcat)   return false;
+    if (rootcause && r.root_cause       !== rootcause) return false;
+
     return true;
   });
-  updateStats(); updateWeeklyTable();
-  updateHistogram(); updatePareto(); updateControlChart(); updateFishboneDiagram(); updateDataTable();
+
+  updateStats();
+  updateWeeklyTable();
+  updateHistogram();
+  updatePareto();
+  updateControlChart();
+  updateFishboneDiagram();
+  updateDataTable();
 }
 
 function resetFilters() {
-  ['filter-date-from','filter-date-to'].forEach(id => document.getElementById(id).value = '');
+  ['filter-date-from','filter-date-to','filter-sku'].forEach(id => document.getElementById(id).value = '');
   ['filter-defect','filter-prodcat','filter-rootcause'].forEach(id => document.getElementById(id).value = '');
   applyFilters();
 }
