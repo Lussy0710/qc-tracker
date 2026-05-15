@@ -8,26 +8,26 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --p0:  #F0F7FF;
-    --p1:  #E0EFFE;
-    --p2:  #C2DFFD;
-    --p3:  #93C5FB;
-    --p4:  #6AACF8;
-    --p5:  #3B8EF0;
-    --p6:  #2272D9;
-    --p7:  #1A5BBD;
-    --p8:  #144898;
+    --p0:  #FFF9F5;
+    --p1:  #FFF0D9;
+    --p2:  #FFDDBB;
+    --p3:  #FFB7C5;
+    --p4:  #FF9EB5;
+    --p5:  #F48FB1;
+    --p6:  #E97FA5;
+    --p7:  #D96C95;
+    --p8:  #C85D88;
 
-    --ink:  #1A2744;
-    --ink2: #3D517A;
-    --ink3: #7389AA;
-    --line: #D6E6FA;
-    --surf: #F7FBFF;
+    --ink:  #6B4C57;
+    --ink2: #8A6672;
+    --ink3: #B08994;
+    --line: #FFE2C6;
+    --surf: #FFFDF8;
 
-    --rose:     #FFD6D6; --rose-ink: #A83232;
-    --amber:    #FFF0CC; --amber-ink: #8A5A00;
-    --mint:     #CCFAE8; --mint-ink: #0F6B42;
-    --lavender: #EAD9FF; --lav-ink:  #6229A8;
+    --rose: #FFE1EA; --rose-ink: #C45A7A;
+    --amber: #FFF3C9; --amber-ink: #C28A00;
+    --mint: #FFF5D6; --mint-ink: #B88700;
+    --lavender: #FFE7F0; --lav-ink: #C45A7A;
 
     --radius-card: 20px;
     --radius-sm:   12px;
@@ -390,6 +390,14 @@
   }
   .delete-row-btn:hover { background: var(--rose); }
 
+  .edit-row-btn {
+    background: none; border: 1.5px solid var(--p2); border-radius: 8px;
+    color: var(--p7); padding: 3px 8px; font-size: 0.72rem; font-weight: 700;
+    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.15s; white-space: nowrap; margin-right:6px;
+  }
+  .edit-row-btn:hover { background: var(--p1); }
+
   /* ── MANAGE DATA VIEW ── */
   .manage-page { max-width: 1300px; margin: 0 auto; padding: 1.75rem; position: relative; z-index: 1; }
   .manage-header-card {
@@ -502,6 +510,11 @@
       <div class="filter-field"><label>Date From</label><input type="date" id="filter-date-from" onchange="applyFilters()" /></div>
       <div class="filter-field"><label>Date To</label><input type="date" id="filter-date-to" onchange="applyFilters()" /></div>
       <div class="filter-field">
+        <label>Filter SKU / Product</label>
+        <input type="text" id="filter-sku" placeholder="Cari SKU..." oninput="applyFilters()" />
+      </div>
+
+      <div class="filter-field">
         <label>Defect Type</label>
         <select id="filter-defect" onchange="applyFilters()">
           <option value="">All Defects</option>
@@ -582,7 +595,7 @@
 <div class="form-page">
   <div class="form-card">
     <div class="form-card-header">
-      <h2>📝 Log Non-Conformity</h2>
+      <h2 id="form-title">📝 Log Non-Conformity</h2>
       <p>Fill in the details below to record a new QC entry.</p>
     </div>
     <div class="form-body">
@@ -602,8 +615,8 @@
       <div class="form-section-title">📦 Product Information</div>
       <div class="form-grid">
         <div class="form-group">
-          <label>Product Name <span class="req">*</span></label>
-          <input type="text" id="f-product-name" placeholder="e.g. Chocolate Wafer 100g" /><span class="form-error" id="err-product-name"></span>
+          <label>SKU / Product Name <span class="req">*</span></label>
+          <input type="text" id="f-product-name" placeholder="e.g. SKU-001 Chocolate Wafer 100g" /><span class="form-error" id="err-product-name"></span>
         </div>
         <div class="form-group">
           <label>Product Category <span class="req">*</span></label>
@@ -739,6 +752,7 @@ let supabaseClient = false;
 let allData = [];
 let filteredData = [];
 let charts = {};
+let editingId = null;
 
 const ROOT_CAUSES = ['Vendor Spec','Man Power','Material','Machine','Facility','Recipe','Work Instruction'];
 const RC_COLORS = ['#93C5FB','#6AACF8','#3B8EF0','#2272D9','#1A5BBD','#144898','#0F3678'];
@@ -810,9 +824,12 @@ async function submitEntry() {
   if (!validateForm()) return;
   const btn = document.getElementById('btn-submit');
   const label = document.getElementById('submit-label');
-  btn.disabled = true; label.textContent = 'Saving…';
+  btn.disabled = true;
+  label.textContent = editingId ? 'Updating…' : 'Saving…';
+
   const entry = {
-    id: Date.now(), timestamp: new Date().toISOString(),
+    id: editingId || Date.now(),
+    timestamp: new Date().toISOString(),
     date: document.getElementById('f-date').value,
     product_name: document.getElementById('f-product-name').value.trim(),
     qty_reject: parseInt(document.getElementById('f-qty-reject').value) || 0,
@@ -827,18 +844,37 @@ async function submitEntry() {
   };
   try {
     if (supabaseClient) {
-      await sbFetch('qc_entries', {
-        method: 'POST',
-        prefer: 'return=minimal',
-        body: JSON.stringify(entry)
-      });
+      if (editingId) {
+        await sbFetch('qc_entries?id=eq.' + editingId, {
+          method: 'PATCH',
+          prefer: 'return=minimal',
+          body: JSON.stringify(entry)
+        });
+      } else {
+        await sbFetch('qc_entries', {
+          method: 'POST',
+          prefer: 'return=minimal',
+          body: JSON.stringify(entry)
+        });
+      }
     } else {
       const existing = JSON.parse(localStorage.getItem('qc_entries') || '[]');
-      existing.push(entry);
+
+      if (editingId) {
+        const idx = existing.findIndex(x => String(x.id) === String(editingId));
+        if (idx !== -1) existing[idx] = entry;
+      } else {
+        existing.push(entry);
+      }
+
       localStorage.setItem('qc_entries', JSON.stringify(existing));
     }
-    showToast('✅ Entry saved!');
+
+    showToast(editingId ? '✏️ Entry updated!' : '✅ Entry saved!');
     resetForm();
+    editingId = null;
+    document.getElementById('form-title').textContent = '📝 Log Non-Conformity';
+    document.getElementById('submit-label').textContent = '✔ Save Entry';
     setTimeout(() => showView('dashboard'), 900);
   } catch(e) {
     console.error('Save error:', e);
@@ -881,6 +917,11 @@ function resetForm() {
     .forEach(id => document.getElementById(id).value = '');
   ['f-product-category','f-mp-category','f-defect-type','f-root-cause']
     .forEach(id => document.getElementById(id).value = '');
+
+  editingId = null;
+  document.getElementById('form-title').textContent = '📝 Log Non-Conformity';
+  document.getElementById('submit-label').textContent = '✔ Save Entry';
+
   clearFormErrors();
 }
 
@@ -896,11 +937,13 @@ function showToast(msg, isError = false) {
 function applyFilters() {
   const from = document.getElementById('filter-date-from').value;
   const to   = document.getElementById('filter-date-to').value;
+  const sku       = (document.getElementById('filter-sku').value || '').toLowerCase();
   const defect    = document.getElementById('filter-defect').value;
   const prodcat   = document.getElementById('filter-prodcat').value;
   const rootcause = document.getElementById('filter-rootcause').value;
   filteredData = allData.filter(r => {
     if (from && r.date < from) return false;
+    if (sku && !(r.product_name || '').toLowerCase().includes(sku)) return false;
     if (to   && r.date > to)   return false;
     if (defect    && r.defect_type       !== defect)    return false;
     if (prodcat   && r.product_category  !== prodcat)   return false;
@@ -912,7 +955,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  ['filter-date-from','filter-date-to'].forEach(id => document.getElementById(id).value = '');
+  ['filter-date-from','filter-date-to','filter-sku'].forEach(id => document.getElementById(id).value = '');
   ['filter-defect','filter-prodcat','filter-rootcause'].forEach(id => document.getElementById(id).value = '');
   applyFilters();
 }
@@ -1084,7 +1127,11 @@ function updateDataTable() {
   const rows = [...filteredData].reverse().slice(0,100).map(r => `
     <tr>
       <td>${r.date||'—'}</td>
-      <td style="font-weight:700">${r.product_name||'—'}</td>
+      <td style="font-weight:700">
+        <button class="edit-row-btn" onclick="editEntry('${r.id}')">✏️ Edit</button>
+        <button class="delete-row-btn" onclick="openDeleteSingle('${r.id}')">🗑 Delete</button>
+        ${r.product_name||'—'}
+      </td>
       <td style="font-weight:800;color:var(--p6)">${r.qty_reject||0}</td>
       <td><span class="badge ${defectBadgeClass[r.defect_type]||'badge-blue'}">${r.defect_type||'—'}</span></td>
       <td>${r.product_category||'—'}</td>
@@ -1113,6 +1160,32 @@ function exportCSV() {
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `qc_rejects_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+}
+
+
+function editEntry(id) {
+  const row = allData.find(r => String(r.id) === String(id));
+  if (!row) return;
+
+  editingId = row.id;
+
+  document.getElementById('form-title').textContent = '✏️ Edit Entry';
+  document.getElementById('submit-label').textContent = '💾 Update Entry';
+
+  document.getElementById('f-date').value = row.date || '';
+  document.getElementById('f-submitted-by').value = row.submitted_by || '';
+  document.getElementById('f-product-name').value = row.product_name || '';
+  document.getElementById('f-product-category').value = row.product_category || '';
+  document.getElementById('f-qty-reject').value = row.qty_reject || '';
+  document.getElementById('f-defect-type').value = row.defect_type || '';
+  document.getElementById('f-root-cause').value = row.root_cause || '';
+  document.getElementById('f-root-cause-details').value = row.root_cause_details || '';
+  document.getElementById('f-notes').value = row.notes || '';
+  document.getElementById('f-mp-category').value = row.mp_category || '';
+  document.getElementById('f-mp-name').value = row.mp_name || '';
+
+  toggleMPFields();
+  showView('form');
 }
 
 function toggleMPFields() {
@@ -1154,7 +1227,11 @@ function renderManageTable() {
     return `<tr class="${selClass}" id="mrow-${r.id}">
       <td class="cb-col"><input type="checkbox" class="row-cb" ${checked} onchange="toggleRowSelect('${r.id}', this)" /></td>
       <td>${r.date||'—'}</td>
-      <td style="font-weight:700">${r.product_name||'—'}</td>
+      <td style="font-weight:700">
+        <button class="edit-row-btn" onclick="editEntry('${r.id}')">✏️ Edit</button>
+        <button class="delete-row-btn" onclick="openDeleteSingle('${r.id}')">🗑 Delete</button>
+        ${r.product_name||'—'}
+      </td>
       <td style="font-weight:800;color:var(--p6)">${r.qty_reject||0}</td>
       <td><span class="badge ${defectBadgeClass[r.defect_type]||'badge-blue'}">${r.defect_type||'—'}</span></td>
       <td>${r.product_category||'—'}</td>
