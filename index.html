@@ -768,23 +768,26 @@ function initSupabase() {
 
 async function sbFetch(path, options = {}) {
   const url = SUPABASE_URL + '/rest/v1/' + path;
+  const preferHeader = options.prefer || 'return=representation';
+  const { prefer, ...restOptions } = options;
   const res = await fetch(url, {
-    ...options,
+    ...restOptions,
     headers: {
       'apikey': SUPABASE_ANON_KEY,
       'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
       'Content-Type': 'application/json',
-      'Prefer': options.prefer || 'return=representation',
-      ...(options.headers || {})
+      'Prefer': preferHeader,
+      ...(restOptions.headers || {})
     }
   });
   const text = await res.text();
-  const json = text ? JSON.parse(text) : [];
   if (!res.ok) {
-    const msg = json?.message || json?.error || text || res.statusText;
-    throw new Error('Supabase ' + res.status + ': ' + msg);
+    let errMsg = res.statusText;
+    try { const j = JSON.parse(text); errMsg = j?.message || j?.error || text || errMsg; } catch(_) { errMsg = text || errMsg; }
+    throw new Error('Supabase ' + res.status + ': ' + errMsg);
   }
-  return json;
+  if (!text || text.trim() === '') return null;
+  try { return JSON.parse(text); } catch(_) { return null; }
 }
 
 async function loadData() {
@@ -1232,7 +1235,8 @@ async function confirmDelete() {
   try {
     for (const id of pendingDeleteIds) {
       if (supabaseClient) {
-        await sbFetch(`qc_entries?id=eq.${id}`, { method: 'DELETE', prefer: 'return=minimal' });
+        const numId = Number(id);
+        await sbFetch(`qc_entries?id=eq.${numId}`, { method: 'DELETE', prefer: 'return=minimal' });
       } else {
         let stored = JSON.parse(localStorage.getItem('qc_entries') || '[]');
         stored = stored.filter(r => String(r.id) !== String(id));
