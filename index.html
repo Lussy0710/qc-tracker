@@ -346,6 +346,91 @@
   }
   #toast.show { transform: translateY(0); opacity: 1; }
 
+  /* ── DELETE MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,20,50,0.45);
+    backdrop-filter: blur(4px); z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.22s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: #fff; border-radius: 20px; padding: 2rem;
+    max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(10,20,50,0.2);
+    transform: translateY(16px) scale(0.97); transition: transform 0.25s cubic-bezier(0.34,1.4,0.64,1);
+    border: 1.5px solid var(--p1);
+  }
+  .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+  .modal-icon { font-size: 2.5rem; text-align: center; margin-bottom: 0.75rem; }
+  .modal-title { font-size: 1.1rem; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .modal-desc { font-size: 0.85rem; color: var(--ink3); text-align: center; font-weight: 500; line-height: 1.55; margin-bottom: 1.5rem; }
+  .modal-desc strong { color: var(--rose-ink); }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; }
+  .btn-modal-cancel {
+    padding: 0.6rem 1.4rem; border-radius: 99px; border: 1.5px solid var(--p2);
+    background: #fff; color: var(--ink2); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-modal-cancel:hover { background: var(--p0); }
+  .btn-modal-delete {
+    padding: 0.6rem 1.4rem; border-radius: 99px; border: none;
+    background: linear-gradient(135deg, #FF7A7A, #C93A3A); color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.875rem; font-weight: 800;
+    cursor: pointer; transition: all 0.18s ease;
+    box-shadow: 0 3px 14px rgba(201,58,58,0.35); display: flex; align-items: center; gap: 6px;
+  }
+  .btn-modal-delete:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(201,58,58,0.45); }
+  .btn-modal-delete:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .delete-row-btn {
+    background: none; border: 1.5px solid var(--rose); border-radius: 8px;
+    color: var(--rose-ink); padding: 3px 8px; font-size: 0.72rem; font-weight: 700;
+    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .delete-row-btn:hover { background: var(--rose); }
+
+  /* ── MANAGE DATA VIEW ── */
+  .manage-page { max-width: 1300px; margin: 0 auto; padding: 1.75rem; position: relative; z-index: 1; }
+  .manage-header-card {
+    background: #fff; border-radius: var(--radius-card); padding: 1.25rem 1.4rem;
+    border: 1.5px solid var(--p1); box-shadow: var(--shadow); margin-bottom: 1.25rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .manage-title { font-size: 1rem; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; }
+  .manage-sub { font-size: 0.78rem; color: var(--ink3); margin-top: 2px; }
+  .manage-search {
+    padding: 0.5rem 1rem; border: 1.5px solid var(--p2); border-radius: 99px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    color: var(--ink); background: var(--p0); min-width: 220px; transition: all 0.15s;
+  }
+  .manage-search:focus { outline: none; border-color: var(--p4); background: #fff; box-shadow: 0 0 0 3px rgba(106,172,248,0.18); }
+  .manage-table-card {
+    background: #fff; border-radius: var(--radius-card);
+    border: 1.5px solid var(--p1); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .manage-table-header {
+    padding: 0.9rem 1.4rem; border-bottom: 1.5px solid var(--p1);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .selected-count {
+    font-size: 0.8rem; font-weight: 700; color: var(--p6);
+    background: var(--p1); padding: 4px 12px; border-radius: 99px;
+  }
+  .btn-delete-selected {
+    padding: 0.45rem 1rem; border-radius: 99px; border: none;
+    background: linear-gradient(135deg, #FF7A7A, #C93A3A); color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; font-weight: 800;
+    cursor: pointer; transition: all 0.15s; opacity: 0.4; pointer-events: none;
+  }
+  .btn-delete-selected.active { opacity: 1; pointer-events: all; box-shadow: 0 2px 10px rgba(201,58,58,0.3); }
+  .btn-delete-selected.active:hover { transform: translateY(-1px); }
+  .manage-table-wrap { overflow-x: auto; }
+  .cb-col { width: 40px; text-align: center !important; }
+  input[type="checkbox"].row-cb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--p5); }
+  .row-selected td { background: #EEF6FF !important; }
+
   @media (max-width: 768px) {
     .charts-grid { grid-template-columns: 1fr; }
     .card.wide { grid-column: 1; }
@@ -369,6 +454,7 @@
   </div>
   <div class="topbar-actions">
     <button class="topbar-btn btn-outline" id="btn-refresh" onclick="loadData()" style="display:none">↻ Refresh</button>
+    <button class="topbar-btn btn-outline" id="btn-manage" onclick="showView('manage')">🗑 Manage Data</button>
     <button class="topbar-btn btn-primary" id="btn-new-entry" onclick="showView('form')">＋ New Entry</button>
     <button class="topbar-btn btn-outline" id="btn-back-dash" onclick="showView('dashboard')" style="display:none">← Dashboard</button>
   </div>
@@ -593,6 +679,52 @@
 </div>
 </div>
 
+<!-- MANAGE DATA VIEW -->
+<div class="view" id="view-manage">
+<div class="manage-page">
+
+  <div class="manage-header-card">
+    <div>
+      <div class="manage-title">🗑 Kelola Data</div>
+      <div class="manage-sub">Pilih satu atau lebih entri untuk dihapus</div>
+    </div>
+    <input type="text" class="manage-search" id="manage-search" placeholder="🔍  Cari produk, tanggal, root cause…" oninput="renderManageTable()" />
+  </div>
+
+  <div class="manage-table-card">
+    <div class="manage-table-header">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span class="table-title">Semua Entri</span>
+        <span class="selected-count" id="sel-count">0 dipilih</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="export-btn" onclick="toggleSelectAll()">☑ Pilih Semua</button>
+        <button class="btn-delete-selected" id="btn-del-selected" onclick="openDeleteSelected()">🗑 Hapus Dipilih</button>
+      </div>
+    </div>
+    <div class="manage-table-wrap">
+      <div id="manage-table-container"><div class="loading-overlay"><div class="spin"></div> Memuat data…</div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title" id="modal-title">Hapus Entri?</div>
+    <div class="modal-desc" id="modal-desc">Data yang dihapus <strong>tidak dapat dikembalikan</strong>. Yakin ingin melanjutkan?</div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-modal-delete" id="btn-confirm-delete" onclick="confirmDelete()">
+        <span id="modal-del-label">🗑 Hapus</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -615,10 +747,13 @@ function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   const isDash = name === 'dashboard';
-  document.getElementById('btn-new-entry').style.display = isDash ? '' : 'none';
+  const isManage = name === 'manage';
+  document.getElementById('btn-new-entry').style.display = (isDash || isManage) ? '' : 'none';
+  document.getElementById('btn-manage').style.display = (isDash || isManage) ? '' : 'none';
   document.getElementById('btn-back-dash').style.display = isDash ? 'none' : '';
   document.getElementById('btn-refresh').style.display = isDash ? '' : 'none';
-  if (isDash) { loadData(); clearFormErrors(); }
+  if (isDash) { loadData().then(() => applyFilters()); clearFormErrors(); }
+  else if (isManage) { loadData().then(() => renderManageTable()); }
   else { document.getElementById('f-date').value = new Date().toISOString().split('T')[0]; }
 }
 
@@ -661,12 +796,10 @@ async function loadData() {
       allData = JSON.parse(localStorage.getItem('qc_entries') || '[]');
       allData.sort((a,b) => new Date(a.date) - new Date(b.date));
     }
-    applyFilters();
   } catch(e) {
     const msg = e?.message || e?.error_description || JSON.stringify(e);
     console.error('Load error:', msg, e);
     allData = JSON.parse(localStorage.getItem('qc_entries') || '[]');
-    applyFilters();
   }
 }
 
@@ -991,8 +1124,137 @@ function toggleMPFields() {
   }
 }
 
+// ── MANAGE / DELETE ──────────────────────────────────────────
+let selectedIds = new Set();
+let pendingDeleteIds = [];
+
+function renderManageTable() {
+  const q = (document.getElementById('manage-search').value || '').toLowerCase();
+  let rows = [...allData].reverse();
+  if (q) {
+    rows = rows.filter(r =>
+      (r.product_name||'').toLowerCase().includes(q) ||
+      (r.date||'').includes(q) ||
+      (r.root_cause||'').toLowerCase().includes(q) ||
+      (r.defect_type||'').toLowerCase().includes(q) ||
+      (r.submitted_by||'').toLowerCase().includes(q)
+    );
+  }
+  const container = document.getElementById('manage-table-container');
+  if (!rows.length) {
+    container.innerHTML = '<div class="no-data"><div class="no-data-icon">📭</div><p>Tidak ada entri ditemukan</p></div>';
+    updateSelCount(); return;
+  }
+  const tableRows = rows.map(r => {
+    const checked = selectedIds.has(String(r.id)) ? 'checked' : '';
+    const selClass = selectedIds.has(String(r.id)) ? 'row-selected' : '';
+    return `<tr class="${selClass}" id="mrow-${r.id}">
+      <td class="cb-col"><input type="checkbox" class="row-cb" ${checked} onchange="toggleRowSelect('${r.id}', this)" /></td>
+      <td>${r.date||'—'}</td>
+      <td style="font-weight:700">${r.product_name||'—'}</td>
+      <td style="font-weight:800;color:var(--p6)">${r.qty_reject||0}</td>
+      <td><span class="badge ${defectBadgeClass[r.defect_type]||'badge-blue'}">${r.defect_type||'—'}</span></td>
+      <td>${r.product_category||'—'}</td>
+      <td><span class="badge badge-blue">${r.root_cause||'—'}</span></td>
+      <td style="color:var(--ink3)">${r.submitted_by||'—'}</td>
+      <td><button class="delete-row-btn" onclick="openDeleteOne('${r.id}', '${(r.product_name||'entri').replace(/'/g,"\\'")}')">🗑 Hapus</button></td>
+    </tr>`;
+  }).join('');
+  container.innerHTML = `
+    <table>
+      <thead><tr>
+        <th class="cb-col">✓</th>
+        <th>Tanggal</th><th>Produk</th><th>Qty</th><th>Defect</th>
+        <th>Kategori</th><th>Root Cause</th><th>Oleh</th><th>Aksi</th>
+      </tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>`;
+  updateSelCount();
+}
+
+function toggleRowSelect(id, cb) {
+  if (cb.checked) selectedIds.add(String(id));
+  else selectedIds.delete(String(id));
+  const row = document.getElementById('mrow-' + id);
+  if (row) row.classList.toggle('row-selected', cb.checked);
+  updateSelCount();
+}
+
+function toggleSelectAll() {
+  const q = (document.getElementById('manage-search').value || '').toLowerCase();
+  let rows = [...allData];
+  if (q) rows = rows.filter(r =>
+    (r.product_name||'').toLowerCase().includes(q) ||
+    (r.date||'').includes(q) ||
+    (r.root_cause||'').toLowerCase().includes(q) ||
+    (r.defect_type||'').toLowerCase().includes(q)
+  );
+  const allIds = rows.map(r => String(r.id));
+  const allSelected = allIds.every(id => selectedIds.has(id));
+  if (allSelected) allIds.forEach(id => selectedIds.delete(id));
+  else allIds.forEach(id => selectedIds.add(id));
+  renderManageTable();
+}
+
+function updateSelCount() {
+  const n = selectedIds.size;
+  document.getElementById('sel-count').textContent = n + ' dipilih';
+  const btn = document.getElementById('btn-del-selected');
+  btn.classList.toggle('active', n > 0);
+}
+
+function openDeleteOne(id, name) {
+  pendingDeleteIds = [String(id)];
+  document.getElementById('modal-title').textContent = 'Hapus Entri?';
+  document.getElementById('modal-desc').innerHTML = `Entri <strong>"${name}"</strong> akan dihapus permanen.<br>Data <strong>tidak dapat dikembalikan</strong>.`;
+  document.getElementById('modal-del-label').textContent = '🗑 Hapus';
+  openModal();
+}
+
+function openDeleteSelected() {
+  const n = selectedIds.size;
+  if (!n) return;
+  pendingDeleteIds = [...selectedIds];
+  document.getElementById('modal-title').textContent = `Hapus ${n} Entri?`;
+  document.getElementById('modal-desc').innerHTML = `Sebanyak <strong>${n} entri</strong> akan dihapus permanen.<br>Data <strong>tidak dapat dikembalikan</strong>.`;
+  document.getElementById('modal-del-label').textContent = `🗑 Hapus ${n} Entri`;
+  openModal();
+}
+
+function openModal() { document.getElementById('delete-modal').classList.add('open'); }
+function closeModal() { document.getElementById('delete-modal').classList.remove('open'); pendingDeleteIds = []; }
+
+async function confirmDelete() {
+  if (!pendingDeleteIds.length) return;
+  const btn = document.getElementById('btn-confirm-delete');
+  const label = document.getElementById('modal-del-label');
+  btn.disabled = true; label.textContent = 'Menghapus…';
+  try {
+    for (const id of pendingDeleteIds) {
+      if (supabaseClient) {
+        await sbFetch(`qc_entries?id=eq.${id}`, { method: 'DELETE', prefer: 'return=minimal' });
+      } else {
+        let stored = JSON.parse(localStorage.getItem('qc_entries') || '[]');
+        stored = stored.filter(r => String(r.id) !== String(id));
+        localStorage.setItem('qc_entries', JSON.stringify(stored));
+      }
+    }
+    const n = pendingDeleteIds.length;
+    pendingDeleteIds.forEach(id => selectedIds.delete(id));
+    closeModal();
+    showToast(`✅ ${n} entri berhasil dihapus`);
+    await loadData();
+    renderManageTable();
+  } catch(e) {
+    console.error('Delete error:', e);
+    showToast('❌ Gagal menghapus: ' + (e.message || 'Unknown error'), true);
+  } finally {
+    btn.disabled = false; label.textContent = '🗑 Hapus';
+  }
+}
+
 initSupabase();
-loadData();
+loadData().then(() => applyFilters());
 </script>
 </body>
 </html>
